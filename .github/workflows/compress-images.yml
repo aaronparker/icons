@@ -39,8 +39,6 @@ jobs:
           git_config_global: true
           git_tag_gpgsign: true
           git_push_gpgsign: false
-          git_committer_name: ${{ secrets.COMMIT_NAME }}
-          git_committer_email: ${{ secrets.COMMIT_EMAIL }}
 
       # Run Pester tests
       - name: Test images
