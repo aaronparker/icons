@@ -15,8 +15,6 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    branches:
-        - main
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -41,8 +39,8 @@ jobs:
           git_config_global: true
           git_tag_gpgsign: true
           git_push_gpgsign: false
-          git_committer_name: Aaron Parker
-          git_committer_email: aaron@stealthpuppy.com
+          git_committer_name: ${{ secrets.COMMIT_NAME }}
+          git_committer_email: ${{ secrets.COMMIT_EMAIL }}
 
       # Run Pester tests
       - name: Test images
