@@ -14,10 +14,10 @@ BeforeDiscovery {
 
     # Get the scripts to test
     # Set variables
-    If (Test-Path -Path env:GITHUB_WORKSPACE -ErrorAction "SilentlyContinue") {
+    if (Test-Path -Path env:GITHUB_WORKSPACE -ErrorAction "SilentlyContinue") {
         $projectRoot = Resolve-Path -Path $env:GITHUB_WORKSPACE
     }
-    Else {
+    else {
         # Local Testing
         $projectRoot = Resolve-Path -Path (((Get-Item (Split-Path -Parent -Path $MyInvocation.MyCommand.Definition)).Parent).FullName)
     }

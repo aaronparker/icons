@@ -6,36 +6,25 @@
 [CmdletBinding()]
 param()
 
-If (Test-Path -Path env:GITHUB_WORKSPACE -ErrorAction "SilentlyContinue") {
+if (Test-Path -Path env:GITHUB_WORKSPACE -ErrorAction "SilentlyContinue") {
     $projectRoot = Resolve-Path -Path $env:GITHUB_WORKSPACE
 }
-Else {
+else {
     # Local Testing
     $projectRoot = Resolve-Path -Path (((Get-Item (Split-Path -Parent -Path $MyInvocation.MyCommand.Definition)).Parent).FullName)
 }
-If (Get-Variable -Name "projectRoot" -ErrorAction "SilentlyContinue") {
+if (Get-Variable -Name "projectRoot" -ErrorAction "SilentlyContinue") {
 
     # Configure the test environment
-    $testsPath = Join-Path -Path $projectRoot -ChildPath "tests"
-    $testOutput = Join-Path -Path $projectRoot -ChildPath "TestsResults.xml"
-    $testConfig = [PesterConfiguration] @{
-        Run        = @{
-            Path     = $testsPath
-            PassThru = $True
-        }
-        TestResult = @{
-            OutputFormat = "NUnitXml"
-            OutputFile   = $testOutput
-        }
-        Show = "Default"
-    }
-    Write-Host "Tests path:      $testsPath."
-    Write-Host "Output path:     $testOutput."
-
-    # Invoke Pester tests
+    $Config = [PesterConfiguration]::Default
+    $Config.Run.Path = "$projectRoot\tests"
+    $Config.Run.PassThru = $True
+    $Config.TestResult.Enabled = $True
+    $Config.TestResult.OutputFormat = "NUnitXml"
+    $Config.TestResult.OutputPath = "$projectRoot\TestsResults.xml"
     Invoke-Pester -Configuration $testConfig
 }
-Else {
+else {
     Write-Warning -Message "Required variable does not exist: projectRoot."
 }
 

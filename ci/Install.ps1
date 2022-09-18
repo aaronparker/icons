@@ -7,10 +7,10 @@
 param()
 
 # Set variables
-If (Test-Path -Path env:GITHUB_WORKSPACE -ErrorAction "SilentlyContinue") {
+if (Test-Path -Path env:GITHUB_WORKSPACE -ErrorAction "SilentlyContinue") {
     $projectRoot = Resolve-Path -Path $env:GITHUB_WORKSPACE
 }
-Else {
+else {
     # Local Testing
     $projectRoot = Resolve-Path -Path (((Get-Item (Split-Path -Parent -Path $MyInvocation.MyCommand.Definition)).Parent).FullName)
 }
@@ -32,15 +32,15 @@ Write-Host "PowerShell Version:" $PSVersionTable.PSVersion.ToString()
 # Install packages
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Install-PackageProvider -Name "NuGet" -MinimumVersion "2.8.5.208" -Force -ErrorAction "SilentlyContinue"
-If (Get-PSRepository -Name "PSGallery" | Where-Object { $_.InstallationPolicy -ne "Trusted" }) {
+if (Get-PSRepository -Name "PSGallery" | Where-Object { $_.InstallationPolicy -ne "Trusted" }) {
     Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted"
 }
 
 # Install modules
-$Modules = "Pester", "posh-git"
-ForEach ($Module in $Modules ) {
-    If ([System.Version]((Find-Module -Name $Module).Version) -gt (Get-Module -Name $Module).Version) {
-        Install-Module -Name $Module -SkipPublisherCheck -Force #-MaximumVersion "4.10.1"
+$Modules = "Pester"
+foreach ($Module in $Modules ) {
+    if ([System.Version]((Find-Module -Name $Module).Version) -gt (Get-Module -Name $Module).Version) {
+        Install-Module -Name $Module -SkipPublisherCheck -Force
     }
     Import-Module -Name $Module -Force
 }

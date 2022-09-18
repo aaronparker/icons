@@ -4,14 +4,14 @@ name: Compress images
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   push:
     branches:
       - main
     paths:
-      - 'icons/**'
-      - '.github/workflows/compress-images.yml'
+      - "icons/**"
+      - ".github/workflows/compress-images.yml"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -52,8 +52,18 @@ jobs:
         run: |
           . .\scripts\Optimise-Images.ps1
 
-      # Update version number in VERSION.txt
-      - name: Push to repo
-        shell: powershell
-        run: |
-          . .\ci\Deploy.ps1
+      - name: Commit changes
+        id: commit
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Update json ${{ steps.get-date.outputs.date }}.${{ github.run_number }} ${{ github.job }}"
+          commit_user_name: ${{ secrets.COMMIT_NAME }}
+          commit_user_email: ${{ secrets.COMMIT_EMAIL }}
+
+      - name: "Run if changes have been detected"
+        if: steps.commit.outputs.changes_detected == 'true'
+        run: echo "Changes committed."
+
+      - name: "Run if no changes have been detected"
+        if: steps.commit.outputs.changes_detected == 'false'
+        run: echo "No changes detected."
