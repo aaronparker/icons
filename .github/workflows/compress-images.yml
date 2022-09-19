@@ -61,20 +61,20 @@ jobs:
         run: |
           . .\scripts\Optimise-Images.ps1 -Path "${{ github.workspace }}"
 
-      # Import GPG key
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v5
-        with:
-          gpg_private_key: ${{ secrets.GPGKEY }}
-          passphrase: ${{ secrets.GPGPASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
-          git_tag_gpgsign: true
-          git_push_gpgsign: false
-          git_committer_name: ${{ secrets.COMMIT_NAME }}
-          git_committer_email: ${{ secrets.COMMIT_EMAIL }}
+      # # Import GPG key
+      # - name: Import GPG key
+      #   id: import_gpg
+      #   uses: crazy-max/ghaction-import-gpg@v5
+      #   with:
+      #     gpg_private_key: ${{ secrets.GPGKEY }}
+      #     passphrase: ${{ secrets.GPGPASSPHRASE }}
+      #     git_user_signingkey: true
+      #     git_commit_gpgsign: true
+      #     git_config_global: true
+      #     git_tag_gpgsign: true
+      #     git_push_gpgsign: false
+      #     git_committer_name: ${{ secrets.COMMIT_NAME }}
+      #     git_committer_email: ${{ secrets.COMMIT_EMAIL }}
 
       - name: Commit changes
         id: commit
