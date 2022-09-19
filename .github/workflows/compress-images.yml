@@ -61,12 +61,12 @@ jobs:
         run: |
             Import-Module -Name "Pester" -Force
             $Config = [PesterConfiguration]::Default
-            $Config.Run.Path = "$projectRoot\tests"
+            $Config.Run.Path = "${{ github.workspace }}\tests"
             $Config.Run.PassThru = $True
             $Config.TestResult.Enabled = $True
             $Config.TestResult.OutputFormat = "NUnitXml"
-            $Config.TestResult.OutputPath = "$projectRoot\TestsResults.xml"
-            Invoke-Pester -Configuration $testConfig
+            $Config.TestResult.OutputPath = "${{ github.workspace }}\TestsResults.xml"
+            Invoke-Pester -Configuration $Config
 
       - name: Compress images
         shell: pwsh
@@ -81,7 +81,7 @@ jobs:
         id: commit
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Update json ${{ steps.get-date.outputs.date }}.${{ github.run_number }} ${{ github.job }}"
+          commit_message: "Validate and compress icons: ${{ github.run_number }}"
           commit_user_name: ${{ secrets.COMMIT_NAME }}
           commit_user_email: ${{ secrets.COMMIT_EMAIL }}
 
