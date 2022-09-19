@@ -5,71 +5,136 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingWriteHost", "")]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
 [CmdletBinding()]
-param()
+param(
+    [System.String] $Path    
+)
 
-# Set variables
-If (Test-Path -Path env:GITHUB_WORKSPACE -ErrorAction "SilentlyContinue") {
-    $projectRoot = Resolve-Path -Path $env:GITHUB_WORKSPACE
+#region Functions
+function Invoke-Process {
+    <#PSScriptInfo
+    .VERSION 1.4
+    .GUID b787dc5d-8d11-45e9-aeef-5cf3a1f690de
+    .AUTHOR Adam Bertram
+    .COMPANYNAME Adam the Automator, LLC
+    .TAGS Processes
+    #>
+
+    <#
+    .DESCRIPTION
+        Invoke-Process is a simple wrapper function that aims to "PowerShellyify" launching typical external processes. There
+        are lots of ways to invoke processes in PowerShell with Start-Process, Invoke-Expression, & and others but none account
+        well for the various streams and exit codes that an external process returns. Also, it's hard to write good tests
+        when launching external processes.
+
+        This function ensures any errors are sent to the error stream, standard output is sent via the Output stream and any
+        time the process returns an exit code other than 0, treat it as an error.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $FilePath,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string] $ArgumentList
+    )
+
+    $ErrorActionPreference = 'Stop'
+
+    try {
+        $stdOutTempFile = "$env:TEMP\$((New-Guid).Guid)"
+        $stdErrTempFile = "$env:TEMP\$((New-Guid).Guid)"
+
+        $startProcessParams = @{
+            FilePath               = $FilePath
+            ArgumentList           = $ArgumentList
+            RedirectStandardError  = $stdErrTempFile
+            RedirectStandardOutput = $stdOutTempFile
+            Wait                   = $true;
+            PassThru               = $true;
+            NoNewWindow            = $true;
+        }
+        if ($PSCmdlet.ShouldProcess("Process [$($FilePath)]", "Run with args: [$($ArgumentList)]")) {
+            $cmd = Start-Process @startProcessParams
+            $cmdOutput = Get-Content -Path $stdOutTempFile -Raw
+            $cmdError = Get-Content -Path $stdErrTempFile -Raw
+            if ($cmd.ExitCode -ne 0) {
+                if ($cmdError) {
+                    throw $cmdError.Trim()
+                }
+                if ($cmdOutput) {
+                    throw $cmdOutput.Trim()
+                }
+            }
+            else {
+                if ([string]::IsNullOrEmpty($cmdOutput) -eq $false) {
+                    Write-Output -InputObject $cmdOutput
+                }
+            }
+        }
+    }
+    catch {
+        $PSCmdlet.ThrowTerminatingError($_)
+    }
+    finally {
+        Remove-Item -Path $stdOutTempFile, $stdErrTempFile -Force -ErrorAction Ignore
+    }
 }
-Else {
-    # Local Testing
-    $projectRoot = Resolve-Path -Path (((Get-Item (Split-Path -Parent -Path $MyInvocation.MyCommand.Definition)).Parent).FullName)
-}
-
-# Variables
-$bin = Join-Path -Path $projectRoot -ChildPath "bin"
-$pngout = Join-Path -Path $bin -ChildPath "pngout.exe"
-$icons = Join-Path -Path $projectRoot -ChildPath "icons"
-$scripts = Join-Path -Path $projectRoot -ChildPath "scripts"
-$imageHashes = Join-Path -Path $scripts -ChildPath "ImageHashes.json"
-
-# Dot source Invoke-Process.ps1. Prevent 'RemoteException' error when running specific git commands
-. $projectRoot\ci\Invoke-Process.ps1
+#endregion
 
 #region Optimise images
 # Read in the existing hashes file
-If (Test-Path -Path $imageHashes) {
+$ImageHashes = [System.IO.Path]::Combine($Path, "scripts", "ImageHashes.json")
+if (Test-Path -Path $imageHashes) {
     try {
-        $pngHashes = Get-Content -Path $imageHashes -Verbose | ConvertFrom-Json
+        $pngHashes = Get-Content -Path $ImageHashes | ConvertFrom-Json
     }
     catch {
-        Throw $_
+        throw $_
     }
 }
 
 # Get all images in the icons folder
-$images = Get-ChildItem -Path $icons -Recurse -Include *.*
+Push-Location -Path $([System.IO.Path]::Combine($Path, "icons"))
+$Images = Get-ChildItem -Path $([System.IO.Path]::Combine($Path, "icons")) -Recurse -Include *.*
+$cleanUp = @()
 
 # Optimise each file if the hash does not match
-Push-Location -Path $icons
-$cleanUp = @()
-ForEach ($image in $images) {
-    $hash = Get-FileHash -Path $image.FullName -Verbose
-    If ($pngHashes.($image.Name) -ne $hash.Hash) {
+foreach ($image in $Images) {
+    $hash = Get-FileHash -Path $image.FullName
+
+    if ($pngHashes.($image.Name) -ne $hash.Hash) {
         Write-Host "Optimising: $($image.Name)"
-        $result = Invoke-Process -FilePath $pngout -ArgumentList "$($image.FullName) /y /q /force" -Verbose
-        If ($result -like "*Out:*") {
+
+        $params = @{
+            FilePath     = $([System.IO.Path]::Combine($Path, "bin", "pngout.exe"))
+            ArgumentList = "$($image.FullName) /y /q /force"
+        }
+        $result = Invoke-Process @params
+
+        if ($result -like "*Out:*") {
             $result
-            If ([IO.Path]::GetExtension($image.Name) -notmatch ".png" ) {
+            if ([System.IO.Path]::GetExtension($image.Name) -notmatch ".png" ) {
                 $cleanUp += $image.FullName
             }
         }
     }
-    Else {
+    else {
         Write-Host "Hash matches. Skip optimisation: $($image.Name)"
     }
 }
 
 # Remove files that aren't .png that have been optimised
-ForEach ($file in $cleanUp) { Remove-Item -Path $file -Force -Verbose }
+foreach ($file in $cleanUp) { Remove-Item -Path $file -Force }
 Pop-Location
 
 # Read the hashes from all PNG files and output to file for next run
-$pngImages = Get-ChildItem -Path $icons -Recurse -Include "*.png"
-$pngHashes = @{}
-ForEach ($png in $pngImages) {
+$PngImages = Get-ChildItem -Path $([System.IO.Path]::Combine($Path, "icons")) -Recurse -Include "*.png"
+$PngHashes = @{}
+foreach ($png in $PngImages) {
     $hash = Get-FileHash -Path $png.FullName
-    $pngHashes.Add((Split-Path -Path $hash.Path -Leaf), $hash.Hash)
+    $PngHashes.Add((Split-Path -Path $hash.Path -Leaf), $hash.Hash)
 }
-$pngHashes | ConvertTo-Json | Out-File -FilePath $imageHashes -Force -Verbose
+$PngHashes | ConvertTo-Json | Out-File -FilePath $ImageHashes -Force
 #endregion
