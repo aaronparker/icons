@@ -53,13 +53,13 @@ jobs:
             if ([System.Version]((Find-Module -Name $Module).Version) -gt (Get-Module -Name $Module).Version) {
                 Install-Module -Name $Module -SkipPublisherCheck -Force
             }
-            Import-Module -Name $Module -Force
 
       # Run Pester tests
       - name: Test images
         shell: pwsh
         working-directory: "${{ github.workspace }}"
         run: |
+            Import-Module -Name "Pester" -Force
             $Config = [PesterConfiguration]::Default
             $Config.Run.Path = "$projectRoot\tests"
             $Config.Run.PassThru = $True
