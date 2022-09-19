@@ -27,6 +27,40 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      - name: Install modules
+        shell: pwsh
+        working-directory: "${{ github.workspace }}"
+        run: |
+          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Install-PackageProvider -Name "NuGet" -MinimumVersion "2.8.5.208" -Force -ErrorAction "SilentlyContinue"
+          if (Get-PSRepository -Name "PSGallery" | Where-Object { $_.InstallationPolicy -ne "Trusted" }) {
+              Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted" -ErrorAction "SilentlyContinue"
+          }
+          $Module = "Pester"
+          if ([System.Version]((Find-Module -Name $Module).Version) -gt (Get-Module -Name $Module).Version) {
+              Install-Module -Name $Module -SkipPublisherCheck -Force
+          }
+
+      # Run Pester tests
+      - name: Test images
+        shell: pwsh
+        working-directory: "${{ github.workspace }}"
+        run: |
+          Import-Module -Name "Pester" -Force
+          $Config = [PesterConfiguration]::Default
+          $Config.Run.Path = "${{ github.workspace }}\tests"
+          $Config.Run.PassThru = $True
+          $Config.TestResult.Enabled = $True
+          $Config.TestResult.OutputFormat = "NUnitXml"
+          $Config.TestResult.OutputPath = "${{ github.workspace }}\TestsResults.xml"
+          Invoke-Pester -Configuration $Config
+
+      - name: Compress images
+        shell: pwsh
+        working-directory: "${{ github.workspace }}"
+        run: |
+          . .\scripts\Optimise-Images.ps1 -Path "${{ github.workspace }}"
+
       # Import GPG key
       - name: Import GPG key
         id: import_gpg
@@ -39,43 +73,8 @@ jobs:
           git_config_global: true
           git_tag_gpgsign: true
           git_push_gpgsign: false
-
-      - name: Install modules
-        shell: pwsh
-        working-directory: "${{ github.workspace }}"
-        run: |
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Install-PackageProvider -Name "NuGet" -MinimumVersion "2.8.5.208" -Force -ErrorAction "SilentlyContinue"
-            if (Get-PSRepository -Name "PSGallery" | Where-Object { $_.InstallationPolicy -ne "Trusted" }) {
-                Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted" -ErrorAction "SilentlyContinue"
-            }
-            $Module = "Pester"
-            if ([System.Version]((Find-Module -Name $Module).Version) -gt (Get-Module -Name $Module).Version) {
-                Install-Module -Name $Module -SkipPublisherCheck -Force
-            }
-
-      # Run Pester tests
-      - name: Test images
-        shell: pwsh
-        working-directory: "${{ github.workspace }}"
-        run: |
-            Import-Module -Name "Pester" -Force
-            $Config = [PesterConfiguration]::Default
-            $Config.Run.Path = "${{ github.workspace }}\tests"
-            $Config.Run.PassThru = $True
-            $Config.TestResult.Enabled = $True
-            $Config.TestResult.OutputFormat = "NUnitXml"
-            $Config.TestResult.OutputPath = "${{ github.workspace }}\TestsResults.xml"
-            Invoke-Pester -Configuration $Config
-
-      - name: Compress images
-        shell: pwsh
-        working-directory: "${{ github.workspace }}"
-        run: |
-            $params = @{
-                Path = "${{ github.workspace }}"
-            }
-            . .\scripts\Optimise-Images.ps1 @params
+          git_committer_name: ${{ secrets.COMMIT_NAME }}
+          git_committer_email: ${{ secrets.COMMIT_EMAIL }}
 
       - name: Commit changes
         id: commit
