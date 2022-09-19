@@ -47,9 +47,9 @@ jobs:
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             Install-PackageProvider -Name "NuGet" -MinimumVersion "2.8.5.208" -Force -ErrorAction "SilentlyContinue"
             if (Get-PSRepository -Name "PSGallery" | Where-Object { $_.InstallationPolicy -ne "Trusted" }) {
-                Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted"
+                Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted" -ErrorAction "SilentlyContinue"
             }
-            $Modules = "Pester"
+            $Module = "Pester"
             if ([System.Version]((Find-Module -Name $Module).Version) -gt (Get-Module -Name $Module).Version) {
                 Install-Module -Name $Module -SkipPublisherCheck -Force
             }
