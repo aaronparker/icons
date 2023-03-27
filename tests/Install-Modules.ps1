@@ -4,8 +4,8 @@
 
 # Trust the PSGallery for modules
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Install-PackageProvider -Name "NuGet" -MinimumVersion "2.8.5.208"
-Install-PackageProvider -Name "PowerShellGet" -MinimumVersion "2.2.5"
+# Install-PackageProvider -Name "NuGet" -MinimumVersion "2.8.5.208"
+# Install-PackageProvider -Name "PowerShellGet" -MinimumVersion "2.2.5"
 if (Get-PSRepository | Where-Object { $_.Name -eq "PSGallery" -and $_.InstallationPolicy -ne "Trusted" }) {
     Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted"
 }
