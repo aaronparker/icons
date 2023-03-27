@@ -19,8 +19,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   validate:
-    runs-on: windows-2022
-    #runs-on: windows-latest
+    runs-on: windows-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -31,50 +30,42 @@ jobs:
         shell: pwsh
         working-directory: "${{ github.workspace }}"
         run: |
-          [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-          Install-PackageProvider -Name "NuGet" -MinimumVersion "2.8.5.208" -Force -ErrorAction "SilentlyContinue"
-          if (Get-PSRepository -Name "PSGallery" | Where-Object { $_.InstallationPolicy -ne "Trusted" }) {
-              Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted" -ErrorAction "SilentlyContinue"
-          }
-          $Module = "Pester"
-          if ([System.Version]((Find-Module -Name $Module).Version) -gt (Get-Module -Name $Module).Version) {
-              Install-Module -Name $Module -SkipPublisherCheck -Force
-          }
+            .\tests\Install-Modules.ps1
 
       # Run Pester tests
       - name: Test images
         shell: pwsh
         working-directory: "${{ github.workspace }}"
         run: |
-          Import-Module -Name "Pester" -Force
-          $Config = [PesterConfiguration]::Default
+          Import-Module -Name "Pester" -Force -ErrorAction "Stop"
+          $Config = New-PesterConfiguration
           $Config.Run.Path = "${{ github.workspace }}\tests"
           $Config.Run.PassThru = $True
           $Config.TestResult.Enabled = $True
           $Config.TestResult.OutputFormat = "NUnitXml"
-          $Config.TestResult.OutputPath = "${{ github.workspace }}\TestsResults.xml"
+          $Config.TestResult.OutputPath = "${{ github.workspace }}\tests\TestsResults.xml"
           Invoke-Pester -Configuration $Config
+
+      # Upload test results
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: "${{ github.workspace }}\\tests\\TestResults.xml"
+
+      # Publish test results
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        if: always()
+        with:
+          nunit_files: "${{ github.workspace }}\\tests\\TestResults.xml"
 
       - name: Compress images
         shell: pwsh
         working-directory: "${{ github.workspace }}"
         run: |
-          . .\scripts\Optimise-Images.ps1 -Path "${{ github.workspace }}"
-
-      # # Import GPG key
-      # - name: Import GPG key
-      #   id: import_gpg
-      #   uses: crazy-max/ghaction-import-gpg@v5
-      #   with:
-      #     gpg_private_key: ${{ secrets.GPGKEY }}
-      #     passphrase: ${{ secrets.GPGPASSPHRASE }}
-      #     git_user_signingkey: true
-      #     git_commit_gpgsign: true
-      #     git_config_global: true
-      #     git_tag_gpgsign: true
-      #     git_push_gpgsign: false
-      #     git_committer_name: ${{ secrets.COMMIT_NAME }}
-      #     git_committer_email: ${{ secrets.COMMIT_EMAIL }}
+          . .\bin\Optimise-Images.ps1 -Path "${{ github.workspace }}"
 
       - name: Commit changes
         id: commit
@@ -83,11 +74,3 @@ jobs:
           commit_message: "Validate and compress icons: ${{ github.run_number }}"
           commit_user_name: ${{ secrets.COMMIT_NAME }}
           commit_user_email: ${{ secrets.COMMIT_EMAIL }}
-
-      - name: "Run if changes have been detected"
-        if: steps.commit.outputs.changes_detected == 'true'
-        run: echo "Changes committed."
-
-      - name: "Run if no changes have been detected"
-        if: steps.commit.outputs.changes_detected == 'false'
-        run: echo "No changes detected."

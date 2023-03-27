@@ -6,7 +6,7 @@
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseDeclaredVarsMoreThanAssignments", "")]
 [CmdletBinding()]
 param(
-    [System.String] $Path    
+    [System.String] $Path
 )
 
 #region Functions
@@ -85,7 +85,7 @@ function Invoke-Process {
 
 #region Optimise images
 # Read in the existing hashes file
-$ImageHashes = [System.IO.Path]::Combine($Path, "scripts", "ImageHashes.json")
+$ImageHashes = [System.IO.Path]::Combine($Path, "bin", "ImageHashes.json")
 if (Test-Path -Path $imageHashes) {
     try {
         $pngHashes = Get-Content -Path $ImageHashes | ConvertFrom-Json
