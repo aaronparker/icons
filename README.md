@@ -4,7 +4,7 @@ A set of application icons for Windows, macOS, Android and iOS platforms for use
 
 Icons have been added in their largest size and best possible quality. All icons have been optimised for size using [PNGOUT](http://advsys.net/ken/util/pngout.htm). Icons are optimised and converted to PNG format by scripts run by AppVeyor builds. All non-PNG files are then removed from the icons folder in the repository and pushed back to GitHub.
 
-![A sample list of available icons](icons.png)
+![A sample list of available icons](img/icons.png)
 
 ## Usage
 
