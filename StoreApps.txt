@@ -1,0 +1,37 @@
+Company Portal
+DevToys
+Feedback Hub
+Films & TV
+Get Help
+Mail and Calendar
+Microsoft 365
+Microsoft Accessory Center
+Microsoft Clipchamp
+Microsoft Defender
+Microsoft Journal
+Microsoft Photos
+Microsoft To Do
+Microsoft Whiteboard
+MSN Weather
+OneDrive
+Paint
+Paint 3D
+Phone Link
+Power Automate
+Power BI
+Power BI Desktop
+QuickAssist
+Snipping Tool
+Spotify - Music and Podcasts
+Surface
+VLC UWP
+Windows 365
+Windows Calculator
+Windows Camera
+Windows Clock
+Windows File Recovery
+Windows Media Player
+Windows Notepad
+Windows Sound Recorder
+Windows Terminal
+Xbox Game Bar
