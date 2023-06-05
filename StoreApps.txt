@@ -35,3 +35,4 @@ Windows Notepad
 Windows Sound Recorder
 Windows Terminal
 Xbox Game Bar
+WhatsApp

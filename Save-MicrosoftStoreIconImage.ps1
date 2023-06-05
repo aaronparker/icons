@@ -43,13 +43,22 @@ foreach ($App in $AppsList) {
         }
         $Search = Invoke-RestMethod @params
         
-        # If we get a result, download the icon for the app
+        # Find the icon URL for the application
         if ([System.String]::IsNullOrEmpty($Search.highlightedList.iconUrl)) {
+            $Product = $Search.productsList | Where-Object { $_.title -eq $App }
+            $IconUrl = $Product.iconUrl
+        }
+        else {
+            $IconUrl = $Search.highlightedList.iconUrl
+        }
+
+        if ([System.String]::IsNullOrEmpty($IconUrl)) {
             Write-Warning -Message "Icon URL is empty for app: '$App'"
         }
         else {
+            # If we get a result, download the icon for the app
             $params = @{
-                Uri             = $Search.highlightedList.iconUrl
+                Uri             = $IconUrl
                 OutFile         = $IconFile
                 UseBasicParsing = $true
                 ErrorAction     = "Stop"
