@@ -18,7 +18,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   validate:
-    name: 'Validate and compress icons'
+    name: 'Download app icons from the Store'
     runs-on: windows-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -31,8 +31,8 @@ jobs:
         working-directory: "${{ github.workspace }}"
         run: |
           $params = @{
-            InputFile  = "${{ github.workspace }}\StoreApps.txt"
-            OutputPath = "${{ github.workspace }}\icons"
+            InputFile  = "$Env:GITHUB_WORKSPACE\StoreApps.txt"
+            OutputPath = "$Env:GITHUB_WORKSPACE\icons"
             Verbose    = $true
           }
           & .\Save-MicrosoftStoreIconImage.ps1 @params
