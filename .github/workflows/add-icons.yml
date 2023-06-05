@@ -38,8 +38,8 @@ jobs:
         working-directory: "${{ github.workspace }}"
         run: |
           $params = @{
-            #InputFile  = "$Env:GITHUB_WORKSPACE\StoreApps.txt"
-            #OutputPath = "$Env:GITHUB_WORKSPACE\icons"
+            InputFile  = "$Env:GITHUB_WORKSPACE\StoreApps.txt"
+            OutputPath = "$Env:GITHUB_WORKSPACE\icons"
             Verbose    = $true
           }
           & .\Save-MicrosoftStoreIconImage.ps1 @params

@@ -4,11 +4,11 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
-    [ValidateScript({ if (-not(Test-Path -Path $_ -PathType "Leaf")) { throw "Path not found: '$_'" } })]
+    [ValidateScript({ if ((Test-Path -Path $_ -PathType "Leaf")) { $true } else { throw "Path not found: '$_'" } })]
     [System.String] $InputFile = "$PSScriptRoot\StoreApps.txt",
 
     [Parameter(Mandatory = $false)]
-    [ValidateScript({ if (-not(Test-Path -Path $_ -PathType "Container")) { throw "Path not found: '$_'" } })]
+    [ValidateScript({ if ((Test-Path -Path $_ -PathType "Container")) { $true } else { throw "Path not found: '$_'" } })]
     [System.String] $OutputPath = "$PSScriptRoot\icons",
 
     [Parameter(Mandatory = $false)]
