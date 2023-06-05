@@ -1,0 +1,52 @@
+name: Add icons
+
+# Environment variables
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# Controls when the action will run.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "StoreApps.txt"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  validate:
+    name: 'Validate and compress icons'
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Download Store icons
+        shell: pwsh
+        working-directory: "${{ github.workspace }}"
+        run: |
+          $params = @{
+            InputFile  = "${{ github.workspace }}\StoreApps.txt"
+            OutputPath = "${{ github.workspace }}\icons"
+            Verbose    = $true
+          }
+          & Save-MicrosoftStoreIconImage.ps1 @params
+
+      - name: Compress images
+        shell: pwsh
+        working-directory: "${{ github.workspace }}"
+        run: |
+          . .\bin\Optimise-Images.ps1 -Path "${{ github.workspace }}"
+
+      - name: Commit changes
+        id: commit
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Add Store icons: ${{ github.run_number }}"
+          commit_user_name: ${{ secrets.COMMIT_NAME }}
+          commit_user_email: ${{ secrets.COMMIT_EMAIL }}
