@@ -2,13 +2,19 @@
 
 A set of application icons for Windows, macOS, Android and iOS platforms for use when adding applications to Microsoft Intune or Microsoft Endpoint Configuration Manager (or other device management / MDM and application deployment solutions).
 
-Icons have been added in their largest size and best possible quality. All icons have been optimised for size using [PNGOUT](http://advsys.net/ken/util/pngout.htm). Icons are optimised and converted to PNG format by scripts run by AppVeyor builds. All non-PNG files are then removed from the icons folder in the repository and pushed back to GitHub.
+Icons have been added in their largest size and best possible quality. All icons have been optimised for size using [PNGOUT](http://advsys.net/ken/util/pngout.htm).
 
 ![A sample list of available icons](img/icons.png)
 
 ## Usage
 
 Self-service applications are displayed in the Intune Company Portal app or at the [Microsoft Intune Web Company Portal](https://portal.manage.microsoft.com/) for install. Using high quality product icons ensures users see a familiar interface when accessing these applications.
+
+## Microsoft Store app icons
+
+Microsoft has updated Store apps integration with Microsoft Intune (see [Add Microsoft Store apps to Microsoft Intune](https://learn.microsoft.com/en-us/mem/intune/apps/store-apps-microsoft)); however, app icons are missing when adding Store apps this way.
+
+Until Microsoft fixes this, this repository will include icons for Store-based apps that can be imported into Intune. If you would like to see additional icons for more apps, fork this repo, update [StoreApps.txt](StoreApps.txt) create a pull request to have the app icon imported. StoreApps.txt must include the application name as it appears in the [Microsoft Store](https://apps.microsoft.com/store/apps). Each app must be listed on a new line.
 
 ## License
 
