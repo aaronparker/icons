@@ -35,7 +35,7 @@ jobs:
             OutputPath = "${{ github.workspace }}\icons"
             Verbose    = $true
           }
-          & Save-MicrosoftStoreIconImage.ps1 @params
+          & .\Save-MicrosoftStoreIconImage.ps1 @params
 
       - name: Compress images
         shell: pwsh
