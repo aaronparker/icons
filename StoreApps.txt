@@ -36,3 +36,4 @@ Windows Sound Recorder
 Windows Terminal
 Xbox Game Bar
 WhatsApp
+Dolby Access
