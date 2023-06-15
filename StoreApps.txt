@@ -38,3 +38,4 @@ Xbox Game Bar
 WhatsApp
 Dolby Access
 Intel® Graphics Command Center
+WireGuardPro
