@@ -7,10 +7,9 @@ env:
 # Controls when the action will run.
 on:
   push:
-    branches:
-      - main
     paths:
       - "icons/**"
+      - "companyportal/**"
       - ".github/workflows/compress-images.yml"
 
   # Allows you to run this workflow manually from the Actions tab
