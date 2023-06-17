@@ -83,16 +83,15 @@ function Invoke-Process {
 }
 #endregion
 
-#region Optimise images
+#region Optimise images in icons
 # Read in the existing hashes file
-$ImageHashes = [System.IO.Path]::Combine($Path, "bin", "ImageHashes.json")
+$ImageHashes = [System.IO.Path]::Combine($Path, "bin", "IconHashes.json")
 if (Test-Path -Path $imageHashes) {
     $pngHashes = Get-Content -Path $ImageHashes | ConvertFrom-Json -ErrorAction "Stop"
 }
 
 # Get all images in the icons folder
-Push-Location -Path $Path
-$Images = Get-ChildItem -Path $Path -Recurse -Include "*.png"
+$Images = Get-ChildItem -Path "$Path\icons" -Recurse -Include "*.png"
 $cleanUp = @()
 
 # Optimise each file if the hash does not match
@@ -120,12 +119,56 @@ foreach ($image in $Images) {
     }
 }
 
-# Remove files that aren't .png that have been optimised
-#foreach ($file in $cleanUp) { Remove-Item -Path $file -Force }
-Pop-Location
+# Read the hashes from all PNG files and output to file for next run
+$PngImages = Get-ChildItem -Path "$Path\icons" -Recurse -Include "*.png"
+$PngHashes = @{}
+foreach ($png in $PngImages) {
+    $hash = Get-FileHash -Path $png.FullName
+    $PngHashes.Add((Split-Path -Path $hash.Path -Leaf), $hash.Hash)
+}
+$PngHashes | ConvertTo-Json | Out-File -FilePath $ImageHashes -Force
+#endregion
+
+
+
+#region Optimise images in companyportal
+# Read in the existing hashes file
+$ImageHashes = [System.IO.Path]::Combine($Path, "bin", "CompanyPortalHashes.json")
+if (Test-Path -Path $imageHashes) {
+    $pngHashes = Get-Content -Path $ImageHashes | ConvertFrom-Json -ErrorAction "Stop"
+}
+
+# Get all images in the companyportal folder
+$Images = Get-ChildItem -Path "$Path\companyportal" -Recurse -Include "*.png"
+$cleanUp = @()
+
+# Optimise each file if the hash does not match
+foreach ($image in $Images) {
+    $hash = Get-FileHash -Path $image.FullName
+
+    if ($pngHashes.($image.Name) -ne $hash.Hash) {
+        Write-Host "Optimising: $($image.Name)"
+
+        $params = @{
+            FilePath     = $([System.IO.Path]::Combine($Path, "bin", "pngout.exe"))
+            ArgumentList = "$($image.FullName) /y /q /force"
+        }
+        $result = Invoke-Process @params
+
+        if ($result -like "*Out:*") {
+            $result
+            if ([System.IO.Path]::GetExtension($image.Name) -notmatch ".png" ) {
+                $cleanUp += $image.FullName
+            }
+        }
+    }
+    else {
+        Write-Host "Hash matches. Skip optimisation: $($image.Name)"
+    }
+}
 
 # Read the hashes from all PNG files and output to file for next run
-$PngImages = Get-ChildItem -Path $Path -Recurse -Include "*.png"
+$PngImages = Get-ChildItem -Path "$Path\companyportal" -Recurse -Include "*.png"
 $PngHashes = @{}
 foreach ($png in $PngImages) {
     $hash = Get-FileHash -Path $png.FullName
