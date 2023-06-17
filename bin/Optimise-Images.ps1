@@ -87,17 +87,12 @@ function Invoke-Process {
 # Read in the existing hashes file
 $ImageHashes = [System.IO.Path]::Combine($Path, "bin", "ImageHashes.json")
 if (Test-Path -Path $imageHashes) {
-    try {
-        $pngHashes = Get-Content -Path $ImageHashes | ConvertFrom-Json
-    }
-    catch {
-        throw $_
-    }
+    $pngHashes = Get-Content -Path $ImageHashes | ConvertFrom-Json -ErrorAction "Stop"
 }
 
 # Get all images in the icons folder
-Push-Location -Path $([System.IO.Path]::Combine($Path, "icons"))
-$Images = Get-ChildItem -Path $([System.IO.Path]::Combine($Path, "icons")) -Recurse -Include *.*
+Push-Location -Path $Path
+$Images = Get-ChildItem -Path $Path -Recurse -Include "*.png"
 $cleanUp = @()
 
 # Optimise each file if the hash does not match
@@ -126,11 +121,11 @@ foreach ($image in $Images) {
 }
 
 # Remove files that aren't .png that have been optimised
-foreach ($file in $cleanUp) { Remove-Item -Path $file -Force }
+#foreach ($file in $cleanUp) { Remove-Item -Path $file -Force }
 Pop-Location
 
 # Read the hashes from all PNG files and output to file for next run
-$PngImages = Get-ChildItem -Path $([System.IO.Path]::Combine($Path, "icons")) -Recurse -Include "*.png"
+$PngImages = Get-ChildItem -Path $Path -Recurse -Include "*.png"
 $PngHashes = @{}
 foreach ($png in $PngImages) {
     $hash = Get-FileHash -Path $png.FullName
