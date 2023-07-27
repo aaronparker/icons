@@ -39,3 +39,4 @@ WhatsApp
 Dolby Access
 Intel® Graphics Command Center
 WireGuardPro
+Windows Scan
