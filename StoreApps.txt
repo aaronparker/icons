@@ -43,3 +43,4 @@ Windows Scan
 Microsoft Loop
 NanaZip
 GIMP
+WinSCP
