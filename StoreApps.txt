@@ -44,3 +44,4 @@ Microsoft Loop
 NanaZip
 GIMP
 WinSCP
+Quick Assist
