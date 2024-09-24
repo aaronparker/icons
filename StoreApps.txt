@@ -45,3 +45,5 @@ NanaZip
 GIMP
 WinSCP
 Quick Assist
+Microsoft HoloLens
+Lenovo Vantage
