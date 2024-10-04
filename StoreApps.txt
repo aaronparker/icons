@@ -47,3 +47,23 @@ WinSCP
 Quick Assist
 Microsoft HoloLens
 Lenovo Vantage
+Foxit PDF Reader
+Blender
+Discord
+Webex
+Slack
+WinSCP
+TreeSize Free
+TreeSize
+FileZilla Pro
+Visual Studio Code
+Visual Studio Community 2022
+Java Programming
+Windows App
+Microsoft Remote Desktop
+GIMP
+paint.net
+iCloud
+Mozilla Firefox
+Opera Browser
+Azure VPN Client
