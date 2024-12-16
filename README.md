@@ -12,9 +12,7 @@ Self-service applications are displayed in the Intune Company Portal app or at t
 
 ## Microsoft Store app icons
 
-Microsoft has updated Store apps integration with Microsoft Intune (see [Add Microsoft Store apps to Microsoft Intune](https://learn.microsoft.com/en-us/mem/intune/apps/store-apps-microsoft)); however, app icons are missing when adding Store apps this way.
-
-Until Microsoft fixes this, this repository will include icons for Store-based apps that can be imported into Intune. If you would like to see additional icons for more apps, fork this repo, update [StoreApps.txt](StoreApps.txt) create a pull request to have the app icon imported. StoreApps.txt must include the application name as it appears in the [Microsoft Store](https://apps.microsoft.com/store/apps). Each app must be listed on a new line.
+Microsoft has updated Store apps integration with Microsoft Intune (see [Add Microsoft Store apps to Microsoft Intune](https://learn.microsoft.com/en-us/mem/intune/apps/store-apps-microsoft)); however, app icons are missing when adding Store apps this way. Until Microsoft fixes this, this repository will include icons for Store-based apps that can be imported into Intune.
 
 ## Intune Company Portal icons
 
