@@ -67,7 +67,7 @@ jobs:
 
       - name: Commit changes
         id: commit
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: "Validate and compress icons: ${{ github.run_number }}"
           commit_user_name: ${{ secrets.COMMIT_NAME }}
