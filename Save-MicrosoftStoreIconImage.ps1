@@ -12,15 +12,18 @@ param (
     [System.String] $OutputPath = "$PSScriptRoot\icons",
 
     [Parameter(Mandatory = $false)]
-    [System.String] $StoreSearchUrl = "https://apps.microsoft.com/store/api/Products/GetFilteredSearch?hl=en-gb&gl=AU&FilteredCategories=AllProducts&Query="
+    [System.String] $StoreSearchUrl = "https://apps.microsoft.com/api/products/search?query="
 )
 
-# Don't show a progress bar for Invoke-WebRequest and Invoke-RestMethod
+# Configure the environment
+$ErrorActionPreference = [System.Management.Automation.ActionPreference]::Stop
+$InformationPreference = [System.Management.Automation.ActionPreference]::Continue
 $ProgressPreference = [System.Management.Automation.ActionPreference]::SilentlyContinue
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 
 # Read the list of Store apps in the input file
 # The file must include a list of Store apps as they appear in the store, one line per application
-$AppsList = Get-Content -Path $InputFile -ErrorAction "Stop"
+$AppsList = Get-Content -Path $InputFile
 
 # Loop through the list of Store apps and download the icon if it's not already in the repo
 foreach ($App in $AppsList) {
@@ -35,11 +38,10 @@ foreach ($App in $AppsList) {
         Write-Verbose -Message "Search for icon for app: '$App'"
 
         # Search for the application
-        $SearchUrl = "$StoreSearchUrl$($App -replace '\s', '%20')"
+        $SearchUrl = "$StoreSearchUrl$($App -replace '\s', '+')&mediaType=apps&age=all&price=all&category=all&subscription=all&gl=US&hl=en-US"
         $params = @{
             Uri             = $SearchUrl
             UseBasicParsing = $true
-            ErrorAction     = "Stop"
         }
         $Search = Invoke-RestMethod @params
         
@@ -61,7 +63,6 @@ foreach ($App in $AppsList) {
                 Uri             = $IconUrl
                 OutFile         = $IconFile
                 UseBasicParsing = $true
-                ErrorAction     = "Stop"
             }
             Invoke-WebRequest @params
         }
