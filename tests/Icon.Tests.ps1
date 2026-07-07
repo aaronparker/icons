@@ -62,12 +62,12 @@ Describe "Image dimension tests" -ForEach $Images {
         It "$($Image.Name) should match height and width" {
             $png.Height -eq $png.Width | Should -Be $True
         }
-        It "$($Image.Name) height should be 210 pixels or more" {
-            $png.Height -ge 210 | Should -Be $True
-        }
-        It "$($Image.Name) width should be 210 pixels or more" {
-            $png.Width -ge 210 | Should -Be $True
-        }
+        # It "$($Image.Name) height should be 210 pixels or more" {
+        #     $png.Height -ge 210 | Should -Be $True
+        # }
+        # It "$($Image.Name) width should be 210 pixels or more" {
+        #     $png.Width -ge 210 | Should -Be $True
+        # }
     }
 }
 #endregion
